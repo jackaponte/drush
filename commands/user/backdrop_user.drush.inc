@@ -9,6 +9,52 @@
  */
 function backdrop_user_drush_command() {
   $items = array();
+  $items['user-information'] = array(
+    'description' => 'Print information about the specified user(s).',
+    'aliases' => array('uinf'),
+    'callback' => 'backdrop_command_user_information',
+    'examples' => array(
+      'drush user-information 2,3,someguy,somegal,billgates@microsoft.com' =>
+        'Display information about the listed users.',
+    ),
+    'arguments' => array(
+      'users' => 'A comma delimited list of uids, user names, or email addresses.',
+    ),
+    'required-arguments' => TRUE,
+    'outputformat' => array(
+      'default' => 'key-value-list',
+      'pipe-format' => 'csv',
+      'field-labels' => array(
+        'uid' => 'User ID',
+        'name' => 'User name',
+        'pass' => 'Password',
+        'mail' => 'User mail',
+        'theme' => 'User theme',
+        'signature' => 'Signature',
+        'signature_format' => 'Signature format',
+        'user_created' => 'User created',
+        'created' => 'Created',
+        'user_access' => 'User last access',
+        'access' => 'Last access',
+        'user_login' => 'User last login',
+        'login' => 'Last login',
+        'user_status' => 'User status',
+        'status' => 'Status',
+        'timezone' => 'Time zone',
+        'picture' => 'User picture',
+        'init' => 'Initial user mail',
+        'roles' => 'User roles',
+        'group_audience' => 'Group Audience',
+        'langcode' => 'Language code',
+        'uuid' => 'Uuid',
+      ),
+      'format-cell' => 'csv',
+      'fields-default' => array('uid', 'name', 'mail', 'roles', 'user_status'),
+      'fields-pipe' => array('name', 'uid', 'mail', 'status', 'roles'),
+      'fields-full' => array('uid', 'name', 'pass', 'mail', 'theme', 'signature', 'user_created', 'user_access', 'user_login', 'user_status', 'timezone', 'roles', 'group_audience', 'langcode', 'uuid'),
+      'output-data-type' => 'format-table',
+    ),
+  );
   $items['backdrop-user-login'] = array(
     'description' => 'Display a one time login link for the given user account (defaults to uid 1).',
     'aliases' => array('uli'),
@@ -30,7 +76,34 @@ function backdrop_user_drush_command() {
       'drush user-login --browser=firefox --mail=drush@example.org admin/settings/performance' => 'Open firefox web browser, login as the user with the e-mail address drush@example.org and redirect to the path admin/settings/performance.',
     ),
   );
+  $items['user-create'] = array(
+    'description' => 'Create a user account with the specified name.',
+    'aliases' => array('ucrt'),
+    'callback' => 'backdrop_command_user_create',
+    'arguments' => array(
+      'name' => 'The name of the account to add'
+    ),
+    'required-arguments' => TRUE,
+    'examples' => array(
+      'drush user-create newuser --mail="person@example.com" --password="letmein"' =>
+        'Create a new user account with the name newuser, the email address person@example.com, and the password letmein',
+    ),
+    'options' => array(
+      'password' => 'The password for the new account',
+      'mail' => 'The email address for the new account',
+    ),
+    'outputformat' => $items['user-information']['outputformat'],
+  );
   return $items;
+}
+
+/**
+ * Command callback. Prints information about the specified user(s).
+ */
+function backdrop_command_user_information($users) {
+  $userlist = new UserList($users);
+  $info = $userlist->each('info');
+  return $info;
 }
 
 /**
@@ -118,4 +191,28 @@ function backdrop_command_user_login($user = NULL, $path = NULL) {
 
   drush_start_browser($link);
   return $link;
+}
+
+/**
+ * Creates a new user account.
+ */
+function backdrop_command_user_create($name) {
+  $userversion = drush_user_get_class();
+  $mail = drush_get_option('mail');
+  $pass = drush_get_option('password');
+  $new_user = array(
+    'name' => $name,
+    'pass' => $pass,
+    'mail' => $mail,
+    'access' => '0',
+    'status' => 1,
+  );
+  if (!drush_get_context('DRUSH_SIMULATE')) {
+    if ($account = $userversion->create($new_user)) {
+      return array($account->id() => $account->info());
+    }
+    else {
+      return drush_set_error("Could not create a new user account with the name " . $name . ".");
+    }
+  }
 }
