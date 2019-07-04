@@ -107,6 +107,10 @@ function backdrop_drush_command_alter(&$command) {
       $backdrop_command = 'backdrop-pm-list';
       break;
 
+    case 'role-add-perm':
+        $backdrop_command = 'backdrop-role-add-perm';
+        break;
+
   }
 
   // Commands that work with Backdrop with no adjustments.
