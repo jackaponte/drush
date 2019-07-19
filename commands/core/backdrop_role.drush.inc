@@ -130,7 +130,7 @@ function backdrop_command_role_delete($rid) {
  *
  * @return bool
  */
-function backdrop_command_role_add_perm($rid, $permissions = NULL) {
+function backdrop_command_role_add_perm($role_name, $permissions = NULL) {
   if (is_null($permissions)) {
     // Assume --module is used thus inject a FALSE
     $perms = array(FALSE);
@@ -142,7 +142,7 @@ function backdrop_command_role_add_perm($rid, $permissions = NULL) {
   $added_perm = FALSE;
 
   foreach($perms as $perm) {
-    $result = backdrop_command_role_perm('add', $rid, $perm);
+    $result = backdrop_command_role_perm('add', $role_name, $perm);
     if ($result !== FALSE) {
       $added_perm = TRUE;
       drush_log(dt('Added "!perm" to "!role"', array('!perm' => $perm, '!role' => $result->name)), LogLevel::SUCCESS);
@@ -202,12 +202,11 @@ function backdrop_command_role_remove_perm($rid, $permissions = NULL) {
  * @see drush_set_error()
  * TODO: $rid should be $role_name
  */
-function backdrop_command_role_perm($action, $rid, $permission = NULL) {
-  $role = user_role_load($rid);
+function backdrop_command_role_perm($action, $role_name, $permission = NULL) {
+  $role = user_role_load($role_name);
   if (!$role) {
     return FALSE;
   }
-
 
   // If a permission wasn't provided, but the module option is specified,
   // provide a list of permissions provided by that module.
