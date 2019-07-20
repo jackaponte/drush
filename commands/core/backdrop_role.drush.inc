@@ -130,7 +130,11 @@ function backdrop_command_role_delete($rid) {
  *
  * @return bool
  */
+<<<<<<< HEAD
 function backdrop_command_role_add_perm($role_name, $permissions = NULL) {
+=======
+function backdrop_command_role_add_perm($rid, $permissions = NULL) {
+>>>>>>> 975365361335dbb481fda2070f1d5f2f245d16c8
   if (is_null($permissions)) {
     // Assume --module is used thus inject a FALSE
     $perms = array(FALSE);
@@ -142,7 +146,11 @@ function backdrop_command_role_add_perm($role_name, $permissions = NULL) {
   $added_perm = FALSE;
 
   foreach($perms as $perm) {
+<<<<<<< HEAD
     $result = backdrop_command_role_perm('add', $role_name, $perm);
+=======
+    $result = backdrop_command_role_perm('add', $rid, $perm);
+>>>>>>> 975365361335dbb481fda2070f1d5f2f245d16c8
     if ($result !== FALSE) {
       $added_perm = TRUE;
       drush_log(dt('Added "!perm" to "!role"', array('!perm' => $perm, '!role' => $result->name)), LogLevel::SUCCESS);
@@ -200,18 +208,32 @@ function backdrop_command_role_remove_perm($rid, $permissions = NULL) {
  * @return bool|RoleBase
  *
  * @see drush_set_error()
+<<<<<<< HEAD
  * TODO: $rid should be $role_name
  */
 function backdrop_command_role_perm($action, $role_name, $permission = NULL) {
   $role = user_role_load($role_name);
+=======
+ */
+function backdrop_command_role_perm($action, $rid, $permission = NULL) {
+  $role = user_role_load($rid);
+>>>>>>> 975365361335dbb481fda2070f1d5f2f245d16c8
   if (!$role) {
     return FALSE;
   }
 
+<<<<<<< HEAD
   // If a permission wasn't provided, but the module option is specified,
   // provide a list of permissions provided by that module.
   if (!$permission && $module = drush_get_option('module', FALSE)) {
     drush_include_engine('backdrop', 'environment');
+=======
+
+  // If a permission wasn't provided, but the module option is specified,
+  // provide a list of permissions provided by that module.
+  if (!$permission && $module = drush_get_option('module', FALSE)) {
+    drush_include_engine('drupal', 'environment');
+>>>>>>> 975365361335dbb481fda2070f1d5f2f245d16c8
     if (!drush_module_exists($module)) {
       return drush_set_error('DRUSH_ROLE_ERROR', dt('!module not enabled!', array('!module' => $module)));
     }
