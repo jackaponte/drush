@@ -98,7 +98,7 @@ function backdrop_command_pm_enable() {
  * @see backdrop_command_pm_enable_validate()
  */
 function _enable_project($project, $extensions_list) {
-  // Check against the module_list.
+  // Check against the extensions_list.
   $project_exists = backdrop_command_pm_enable_validate($project, $extensions_list);
   // If the $project directory does not exist then gracefully fail.
   if (!$project_exists) {
