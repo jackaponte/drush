@@ -34,7 +34,7 @@ function backdrop_pm_enable_drush_command() {
 function backdrop_command_pm_enable() {
   $projects = func_get_args();
 
-  if (!isset($projects)) {
+  if (empty($projects)) {
     drush_print_r(dt("\tPlease provide module or theme name(s)\n\n"));
     return;
   }
