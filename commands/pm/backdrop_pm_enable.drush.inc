@@ -35,17 +35,19 @@ function backdrop_command_pm_enable() {
   $projects = func_get_args();
 
   if (!isset($projects)) {
-    drush_print_r(dt("\tPlease provide module name(s)\n\n"));
+    drush_print_r(dt("\tPlease provide module or theme name(s)\n\n"));
     return;
   }
 
   // Get modules present in files system that are possible to enable.
   $module_list = system_rebuild_module_data();
+  $theme_list = system_rebuild_theme_data();
+  $extensions_list = array_merge($module_list, $theme_list);
 
   // Loop through projects to handle dependencies.
   foreach ($projects as $project) {
     // Check if requested module depends on other modules.
-    $dependencies = $module_list[$project]->info['dependencies'];
+    $dependencies = $extensions_list[$project]->info['dependencies'];
     if (!empty($dependencies)) {
       foreach ($dependencies as $dependency) {
         // Prepend dependency to projects list.
@@ -70,7 +72,7 @@ function backdrop_command_pm_enable() {
   else {
     // Enable the projects specified on the cli with dependencies.
     foreach ($projects as $project) {
-      $status = _enable_project($project, $module_list);
+      $status = _enable_project($project, $extensions_list);
       if (!$status) {
         // _enable_project() already output an error message.
         return FALSE;
@@ -87,17 +89,17 @@ function backdrop_command_pm_enable() {
  * @param string $project
  *   The project machine name to be enabled.
  *
- * @param array $module_list
- *   List of modules that exist in the file system.
+ * @param array $extensions_list
+ *   List of modules and themes that exist in the file system.
  *
  * @return bool
  *   TRUE if the module is enabled; FALSE otherwise.
  *
  * @see backdrop_command_pm_enable_validate()
  */
-function _enable_project($project, $module_list) {
+function _enable_project($project, $extensions_list) {
   // Check against the module_list.
-  $project_exists = backdrop_command_pm_enable_validate($project, $module_list);
+  $project_exists = backdrop_command_pm_enable_validate($project, $extensions_list);
   // If the $project directory does not exist then gracefully fail.
   if (!$project_exists) {
     drush_print_r("\n\t\e[031mError\e[0m $project does not exist in your Backdrop installation.");
@@ -131,8 +133,8 @@ function _enable_project($project, $module_list) {
  * @param string $project
  *   The project that the user is attempting to enable.
  */
-function backdrop_command_pm_enable_validate($project, $module_list) {
-  if (array_key_exists($project, $module_list)) {
+function backdrop_command_pm_enable_validate($project, $extensions_list) {
+  if (array_key_exists($project, $extensions_list)) {
     return TRUE;
   }
 
